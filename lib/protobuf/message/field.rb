@@ -26,7 +26,26 @@ module Protobuf
       field_class.new(message_class, rule, type, name, tag, options)
     end
 
+    module FieldComparable
+      def ==(other)
+        if @message_class              == other.instance_variable_get(:@message_class) &&
+           @rule                       == other.instance_variable_get(:@rule) &&
+           @type.to_s.split("::").last == other.instance_variable_get(:@type).to_s.split("::").last &&
+           @name                       == other.instance_variable_get(:@name)
+           @tag                        == other.instance_variable_get(:@tag) &&
+           @options                    == other.instance_variable_get(:@options)
+
+           return true
+        end
+
+        false
+      end
+
+
+    end
+
     class BaseField
+      include FieldComparable
 
       def self.descriptor
         @descriptor ||= Descriptor::FieldDescriptor.new
@@ -44,8 +63,8 @@ module Protobuf
       end
 
       def initialize(message_class, rule, type, name, tag, options)
-        @message_class, @rule, @type, @name, @tag = \
-          message_class, rule, type, name, tag
+        @message_class, @rule, @type, @name, @tag, @options = \
+          message_class, rule, type, name, tag, options.dup
 
         @default   = options.delete(:default)
         @extension = options.delete(:extension)
@@ -210,6 +229,7 @@ module Protobuf
 
 
     class FieldProxy
+      include FieldComparable
 
       def initialize(message_class, rule, type, name, tag, options)
         @message_class, @rule, @type, @name, @tag, @options =

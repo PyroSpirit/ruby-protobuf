@@ -12,4 +12,19 @@ class ParseTest < Test::Unit::TestCase
     assert_equal('555-4321', person.phone[0].number)
     assert_equal(Tutorial::Person::PhoneType::HOME, person.phone[0].type)
   end
+
+  def test_double_require
+    assert_nothing_raised(Protobuf::TagCollisionError) do
+      silence_warnings do
+        require "#{File.dirname(__FILE__)}/proto/addressbook_redefined.pb"
+      end
+    end
+  end
+
+  def silence_warnings
+    old_verbose, $VERBOSE = $VERBOSE, nil
+    yield
+  ensure
+    $VERBOSE = old_verbose
+  end
 end

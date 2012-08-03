@@ -39,10 +39,11 @@ module Protobuf
           raise RangeError, "#{tag} is not in #{@extension_tag}"
         end
 
-        if fields.include?(tag)
+        field = Field.build(self, rule, type, fname, tag, options)
+        if fields.include?(tag) && fields[tag] != field
           raise TagCollisionError, "Field tag #{tag} has already been used in #{self.name}."
         end
-        fields[tag] = Field.build(self, rule, type, fname, tag, options)
+        fields[tag] = field
         clear_field_cache
       end
 
